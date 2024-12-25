@@ -1,0 +1,23 @@
+{
+    "users": [
+      {
+        "id": 1,
+        "username": "doctor1",
+        "password": "password123",
+        "role": "doctor"
+      },
+      {
+        "id": 2,
+        "username": "patient1",
+        "password": "password123",
+        "role": "patient"
+      },
+      {
+        "id": 3,
+        "username": "admin1",
+        "password": "password123",
+        "role": "admin"
+      }
+    ]
+  }
+  
