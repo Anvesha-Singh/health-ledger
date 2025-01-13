@@ -11,6 +11,23 @@ body {
     background-color: #b2ebf2 !important;
 }
 
+.signup-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+  
+.signup-box {
+    width: 100%; 
+    padding: 2rem;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+  
 .login-container {
     display: flex;
     justify-content: space-between;
@@ -39,6 +56,47 @@ body {
     background-color: #b2ebf2;
 }
 
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    width: 100%; 
+}
+  
+.form-row {
+display: flex;
+gap: 1rem; 
+justify-content: space-between;
+width: 100%;
+align-items: center;
+}
+
+.form-row input, .form-row select {
+flex: 1; 
+padding: 0.4rem;
+border: 1px solid #ccc;
+border-radius: 5px;
+}
+  
+.password-error {
+    font-size: 0.9rem;
+    color: red;
+    flex: 1 1 100%;
+}
+  
+.submit-btn {
+background-color: #007BFF;
+color: white;
+padding: 0.8rem;
+border: none;
+border-radius: 5px;
+cursor: pointer;
+}
+
+.submit-btn:hover {
+background-color: #0056b3;
+}
+  
 .image-box {
     flex: 1;
     background-image: url('src/assets/carousal_1.jpg'); 
@@ -98,7 +156,7 @@ input:focus {
     font-size: larger;
     font-style: normal;
     font-family: 'Mogra', sans-serif;
-    width: 60%;
+    width: 100%;
 }
 
 .header .logo img {
@@ -122,6 +180,7 @@ input:focus {
     background-color: #1a237e;
     padding: 0.75rem;
     border-radius: 8px;
+    width: 100%;
 }
 
 .details {
@@ -146,6 +205,7 @@ input:focus {
     border-radius: 8px;
     font-size: 1.1rem;
     color: #1a237e;
+    gap: 2rem;
 }
 
 .patient-id {

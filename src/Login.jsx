@@ -59,7 +59,7 @@ const Login = () => {
           <header className="header">
             <div className="logo">
               <img src={logoImg} alt="Health Ledger Logo" />
-              <span>Health Ledger</span>
+              <h1>Health Ledger</h1>
             </div>
           </header>
           <form onSubmit={handleSubmit}>
