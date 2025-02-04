@@ -29,6 +29,18 @@
       "username": "supriya16",
       "password": "supriya16",
       "role": "patient"
+    },
+    {
+      "id": "04ab",
+      "username": "ss1234",
+      "password": "12345678",
+      "role": "patient"
+    },
+    {
+      "id": "e4f4",
+      "username": "ss1234",
+      "password": "12345678",
+      "role": "patient"
     }
   ]
 }
