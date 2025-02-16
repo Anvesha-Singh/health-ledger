@@ -207,6 +207,40 @@ input:focus {
     color: #1a237e;
     gap: 2rem;
 }
+  
+.summary-table {
+    width: 100%;
+    border-collapse: collapse;
+    padding: 10px;
+    border: 0.5px solid #1a237e;  /* Light border for the entire table */
+    border-radius: 8px; /* Rounded corners */
+    overflow: hidden; /* Ensures borders stay within rounded edges */
+  }
+  
+  .summary-table th,
+  .summary-table td {
+    padding: 10px;
+    border: 1px solid #1a237e; /* Light border for cells */
+    text-align: left;
+  }
+  
+  .summary-table th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  .even-row {
+    background-color: #f9f9f9;
+  }
+  
+  .odd-row {
+    background-color: #e6f7ff;
+  }
+  
+  .summary-dropdown {
+    padding-top: 10px; 
+    border-radius: 8px;
+  }  
 
 .patient-id {
     color: #1a237e;

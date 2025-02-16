@@ -41,6 +41,18 @@
       "username": "ss1234",
       "password": "12345678",
       "role": "patient"
+    },
+    {
+      "id": "1751",
+      "username": "assd123",
+      "password": "assd12345",
+      "role": "patient"
+    },
+    {
+      "id": "ec03",
+      "username": "assd123",
+      "password": "assd12345",
+      "role": "patient"
     }
   ]
 }
