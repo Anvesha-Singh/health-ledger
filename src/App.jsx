@@ -5,6 +5,7 @@ import PatientDashboard from './PatientDashboard.jsx';
 import DoctorDashboard from './DoctorDashboard.jsx';
 import AdminDashboard from './AdminDashboard.jsx';
 import PatientSignup from './PatientSignup';
+import HomePage from './HomePage.jsx';
 
 function App() {
   return (
