@@ -6,6 +6,8 @@ import DoctorDashboard from './DoctorDashboard.jsx';
 import AdminDashboard from './AdminDashboard.jsx';
 import PatientSignup from './PatientSignup';
 import HomePage from './HomePage.jsx';
+import DoctorChatBot from './Chatbot.jsx';
+import PatientChatBot from './Patient_Chatbot.jsx';
 
 function App() {
   return (
@@ -17,6 +19,8 @@ function App() {
         <Route path="/patient-dashboard" element={<PatientDashboard />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/signup" element={<PatientSignup />} />
+        <Route path="/doc_chatbot" element={<DoctorChatBot />} />
+        <Route path="/pat_chatbot" element={<PatientChatBot />} />
       </Routes>
     </BrowserRouter>
   );
