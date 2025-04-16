@@ -5,18 +5,41 @@ import PatientDashboard from './PatientDashboard.jsx';
 import DoctorDashboard from './DoctorDashboard.jsx';
 import AdminDashboard from './AdminDashboard.jsx';
 import PatientSignup from './PatientSignup';
+import ContractProvider from './context/ContractProvider';
+import ProtectedRoute from './ProtectedRoute';
+import RegisterHospital from './RegisterHospital';
+import CompleteRegistration from './CompleteRegistration';
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
-        <Route path="/doctor-dashboard" element={<DoctorDashboard />} />
-        <Route path="/patient-dashboard" element={<PatientDashboard />} />
-        <Route path="/admin-dashboard" element={<AdminDashboard />} />
-        <Route path="/signup" element={<PatientSignup />} />
-      </Routes>
-    </BrowserRouter>
+    <ContractProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/signup" element={<PatientSignup />} />
+          <Route path="/register-hospital" element={<RegisterHospital />} />
+          <Route path="/complete-registration" element={<CompleteRegistration />} />
+          
+          <Route path="/admin-dashboard" element={
+            <ProtectedRoute role={2}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }/>
+          
+          <Route path="/doctor-dashboard" element={
+            <ProtectedRoute role={1}>
+              <DoctorDashboard />
+            </ProtectedRoute>
+          }/>
+          
+          <Route path="/patient-dashboard" element={
+            <ProtectedRoute role={0}>
+              <PatientDashboard />
+            </ProtectedRoute>
+          }/>
+        </Routes>
+      </BrowserRouter>
+    </ContractProvider>
   );
 }
 

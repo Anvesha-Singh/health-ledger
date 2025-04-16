@@ -11,6 +11,30 @@ body {
     background-color: #b2ebf2 !important;
 }
 
+.signup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.signup-form input, .signup-form select {
+padding: 12px;
+border-radius: 8px;
+border: 1px solid #2d2d2d;
+background: #1a1a1a;
+color: white;
+}
+
+.signup-form select {
+appearance: none;
+background-image: url("data:image/svg+xml;charset=US-ASCII,...");
+background-repeat: no-repeat;
+background-position: right 10px center;
+}
+
+  
 .signup-container {
     display: flex;
     justify-content: center;
