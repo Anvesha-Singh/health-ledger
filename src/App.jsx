@@ -7,8 +7,6 @@ import AdminDashboard from './AdminDashboard.jsx';
 import PatientSignup from './PatientSignup';
 import ContractProvider from './context/ContractProvider';
 import ProtectedRoute from './ProtectedRoute';
-import RegisterHospital from './RegisterHospital';
-import CompleteRegistration from './CompleteRegistration';
 
 function App() {
   return (
@@ -17,8 +15,6 @@ function App() {
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/signup" element={<PatientSignup />} />
-          <Route path="/register-hospital" element={<RegisterHospital />} />
-          <Route path="/complete-registration" element={<CompleteRegistration />} />
           
           <Route path="/admin-dashboard" element={
             <ProtectedRoute role={2}>
