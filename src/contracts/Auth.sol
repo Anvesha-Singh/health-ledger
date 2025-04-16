@@ -1,14 +1,13 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.18;
 
-contract HealthLedger {
-    enum Role { Patient, Doctor, Admin }
+contract HealthAuth {
+    enum Role { Unregistered, Patient, Doctor, Admin }
     
     struct Patient {
         string name;
         uint256 age;
         string gender;
-        string username;
     }
 
     struct Doctor {
@@ -23,47 +22,100 @@ contract HealthLedger {
     }
 
     mapping(address => Role) public roles;
-    mapping(address => Patient) public patients;
-    mapping(address => Doctor) public doctors;
     mapping(address => Hospital) public hospitals;
-    
-    address[] public allHospitals;
+    mapping(address => Doctor) public doctors;
+    mapping(address => Patient) public patients;
+    mapping(address => address[]) public adminDoctors;
+    mapping(address => address[]) public doctorPatients;
 
-    constructor() {
-        roles[msg.sender] = Role.Admin;
+    event RoleUpdated(address indexed user, Role role);
+    event PatientAdded(address indexed doctor, address patient, string name);
+
+    function addPatient(address _patient, string memory _name) external onlyDoctor {
+        require(roles[_patient] == Role.Unregistered, "Patient already registered");
+        
+        roles[_patient] = Role.Patient;
+        patients[_patient] = Patient(_name, 0, "");  
+        doctorPatients[msg.sender].push(_patient);
+        
+        emit PatientAdded(msg.sender, _patient, _name);
     }
 
-    modifier onlyAdmin() {
-        require(roles[msg.sender] == Role.Admin, "Only admin");
+    modifier onlyDoctor() {
+        require(roles[msg.sender] == Role.Doctor || roles[msg.sender] == Role.Admin, "Not a doctor");
         _;
     }
 
-    function registerHospital(string memory _name) public onlyAdmin {
-        hospitals[msg.sender] = Hospital(_name, msg.sender);
-        allHospitals.push(msg.sender);
+    constructor() {
+        roles[msg.sender] = Role.Admin;
+        emit RoleUpdated(msg.sender, Role.Admin);
     }
 
-    function addDoctor(
-        address _doctorAddress,
+    function getRole(address _user) external view returns (uint8) {
+        return uint8(roles[_user]);
+    }
+
+    modifier onlyAdmin() {
+        require(roles[msg.sender] == Role.Admin, "Unauthorized access");
+        _;
+    }
+
+    function registerHospital(string memory _name) external onlyAdmin {
+        require(bytes(hospitals[msg.sender].name).length == 0, "Hospital already registered");
+        hospitals[msg.sender] = Hospital(_name, msg.sender);
+    }
+
+    function registerDoctor(
+        address _doctor,
         string memory _name,
         string memory _specialization
-    ) public onlyAdmin {
-        require(roles[_doctorAddress] == Role.Doctor, "Not a doctor");
-        doctors[_doctorAddress] = Doctor(
-            _name,
-            _specialization,
-            hospitals[msg.sender].name
-        );
+    ) external onlyAdmin {
+        require(roles[_doctor] == Role.Unregistered, "Address already registered");
+        require(bytes(hospitals[msg.sender].name).length > 0, "Register hospital first");
+        
+        roles[_doctor] = Role.Doctor;
+        doctors[_doctor] = Doctor({
+            name: _name,
+            specialization: _specialization,
+            hospital: hospitals[msg.sender].name 
+        });
+        adminDoctors[msg.sender].push(_doctor);
+        emit RoleUpdated(_doctor, Role.Doctor);
     }
+
+    event PatientRegistered(address indexed patient);
 
     function registerPatient(
         string memory _name,
         uint256 _age,
-        string memory _gender,
-        string memory _username
-    ) public {
-        require(roles[msg.sender] != Role.Admin, "Admins cannot register as patients");
+        string memory _gender
+    ) external {
+        require(roles[msg.sender] == Role.Unregistered, "Already registered");
+        require(bytes(_name).length > 0, "Name required");
+        require(_age > 0, "Invalid age");
+        
         roles[msg.sender] = Role.Patient;
-        patients[msg.sender] = Patient(_name, _age, _gender, _username);
+        patients[msg.sender] = Patient(_name, _age, _gender);
+        emit PatientRegistered(msg.sender);
+        emit RoleUpdated(msg.sender, Role.Patient);
+    }
+
+    function getDoctorsByAdmin(address admin) public view returns (address[] memory) {
+        return adminDoctors[admin];
+    }
+
+    function getDoctorDetails(address doctor) public view returns (string memory, string memory, string memory) {
+        Doctor memory d = doctors[doctor];
+        return (d.name, d.specialization, d.hospital);
+    }
+
+    function getPatientsByDoctor(address doctor) external view returns (Patient[] memory) {
+        address[] memory patientAddresses = doctorPatients[doctor];
+        Patient[] memory result = new Patient[](patientAddresses.length);
+        
+        for (uint i = 0; i < patientAddresses.length; i++) {
+            result[i] = patients[patientAddresses[i]];
+        }
+        return result;
     }
 }

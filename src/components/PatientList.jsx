@@ -1,73 +1,60 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { ContractContext } from "../context/ContractContext";
+import Web3 from 'web3';
+import '../styles.css';
 
 const PatientList = () => {
-  const patients = [
-    { id: "P1068", name: "Jane Doe" },
-    { id: "P1067", name: "Prisha Patel" },
-    { id: "P1048", name: "Sneha Prajapati" },
-    { id: "P1022", name: "Hardik K" },
-  ];
+  const { contract } = useContext(ContractContext);
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [summaries, setSummaries] = useState({});
-  const [openDropdown, setOpenDropdown] = useState(null);
-
-  const handleSummarize = async (patientId) => {
+  const loadPatients = async () => {
     try {
-      const response = await fetch("http://localhost:5000/summarize", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ patient_id: patientId }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = await response.json();
-      setSummaries((prev) => ({ ...prev, [patientId]: data.summary }));
-      setOpenDropdown(openDropdown === patientId ? null : patientId);
-    } catch (error) {
-      console.error("Error fetching summary:", error);
+      const web3 = new Web3(window.ethereum);
+      const accounts = await web3.eth.getAccounts();
+      
+      // Get patients added by this doctor
+      const patientAddresses = await contract.methods.doctorPatients(accounts[0]).call();
+      
+      // Get patient details
+      const patientData = await Promise.all(
+        patientAddresses.map(async address => {
+          const data = await contract.methods.patients(address).call();
+          return {
+            address,
+            name: data.name
+          };
+        })
+      );
+      
+      setPatients(patientData);
+    } catch (err) {
+      console.error("Error loading patients:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
+  useEffect(() => {
+    if (contract) loadPatients();
+  }, [contract]);
+
+  if (loading) return <div>Loading patients...</div>;
+
   return (
     <div className="patient-list">
-      {patients.map((patient) => (
-        <div key={patient.id} className="patient-container">
-          {/* Patient Details */}
-          <div className="patient-item">
-            <div className="patient-info">
-              <span className="patient-id">{patient.id}</span>
-              <span className="patient-name">{patient.name}</span>
-            </div>
-            <div className="doctor-actions">
-              <button className="all-btns">View History</button>
-              <button className="all-btns" onClick={() => handleSummarize(patient.id)}>
-                Summarize AI {"\u2728"}
-              </button>
+      {patients.length === 0 ? (
+        <div className="empty-state">No patients found</div>
+      ) : (
+        patients.map((patient) => (
+          <div key={patient.address} className="patient-card">
+            <div className="patient-header">
+              <h5>{patient.name}</h5>
+              <span>{patient.address.slice(0, 12)}...</span>
             </div>
           </div>
-
-          {/* Dropdown Summary (Separate Div) */}
-          {openDropdown === patient.id && summaries[patient.id] && (
-            <div className="summary-dropdown">
-              <table className="summary-table">
-                <tbody>
-                  {Object.entries(summaries[patient.id]).map(([key, value], index) => (
-                    <tr key={key} className={index % 2 === 0 ? "even-row" : "odd-row"}>
-                      <td><strong>{key}</strong></td>
-                      <td>{Array.isArray(value) ? value.join(", ") : value || "N/A"}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 };

@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ContractContext } from './context/ContractContext';
+import Web3 from 'web3';
 import logoImg from './assets/logo.png';
 import './styles.css';
 
@@ -7,14 +9,13 @@ const PatientSignup = () => {
   const [formData, setFormData] = useState({
     name: '',
     age: '',
-    gender: '',
-    username: '',
-    password: '',
-    confirmPassword: ''
+    gender: ''
   });
   const [error, setError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { contract } = useContext(ContractContext);
+  const web3 = new Web3(window.ethereum);
 
   const handleChange = (e) => {
     setFormData({
@@ -23,61 +24,31 @@ const PatientSignup = () => {
     });
   };
 
-  const handlePasswordChange = (e) => {
-    const value = e.target.value;
-    setFormData({ ...formData, password: value });
-
-    const passwordRules = /^.{8,}$/;
-    if (!passwordRules.test(value)) {
-      setPasswordError('Password should be minimum 8 characters.');
-    } else {
-      setPasswordError('');
-    }
-  };
-
-  const handleConfirmPasswordChange = (e) => {
-    const value = e.target.value;
-    setFormData({ ...formData, confirmPassword: value });
-
-    if (value !== formData.password) {
-      setPasswordError('Passwords do not match.');
-    } else {
-      setPasswordError('');
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    setPasswordError('');
 
-    // Check if any required field is empty
-    const requiredFields = ['name', 'age', 'gender', 'username', 'password', 'confirmPassword'];
-    const emptyFields = requiredFields.filter(field => !formData[field]);
-
-    if (emptyFields.length > 0) {
+    if (!formData.name || !formData.age || !formData.gender) {
       setError('Please fill all required fields.');
-      return; // Stop further execution if any fields are empty
+      return;
     }
 
     try {
-      const response = await fetch('http://localhost:5000/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password,
-          role: 'patient'
-        })
-      });
+      setLoading(true);
+      const accounts = await web3.eth.getAccounts();
 
-      if (response.ok) {
-        setTimeout(() => navigate('/'), 2000); // Navigate after success
-      } else {
-        setError('Failed to create account. Please try again.');
-      }
+      await contract.methods.registerPatient(
+        formData.name,
+        parseInt(formData.age),
+        formData.gender
+      ).send({ from: accounts[0] });
+
+      navigate('/patient-dashboard');
     } catch (err) {
-      setError('An error occurred. Please try again.');
+      console.error('Registration error:', err);
+      setError(err.message || 'Registration failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -92,93 +63,39 @@ const PatientSignup = () => {
         </header>
         <h1 className="dashboard-title">Create Account</h1>
         <form onSubmit={handleSubmit} className="signup-form">
-          {/* Row 1: Name */}
-          <div className="form-row">
-            <input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <input
+            type="text"
+            name="name"
+            placeholder="Name"
+            value={formData.name}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="number"
+            name="age"
+            placeholder="Age"
+            value={formData.age}
+            onChange={handleChange}
+            required
+          />
+          <select
+            name="gender"
+            value={formData.gender}
+            onChange={handleChange}
+            required
+          >
+            <option value="" disabled>Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
 
-          {/* Row 2: Age and Gender */}
-          <div className="form-row">
-            <input
-              type="number"
-              name="age"
-              placeholder="Age"
-              value={formData.age}
-              onChange={handleChange}
-              required
-            />
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              required
-            >
-              <option value="" disabled>
-                Gender
-              </option>
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+          {error && <div className="error-message">{error}</div>}
 
-          {/* Row 3: Username */}
-          <div className="form-row">
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Row for Password and Confirm Password */}
-          <div className="form-row">
-            <div>
-              <input
-                type="password"
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handlePasswordChange}
-                required
-              />
-            </div>
-
-            <div>
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                value={formData.confirmPassword}
-                onChange={handleConfirmPasswordChange}
-                required
-              />
-            </div>
-          </div>
-
-          {passwordError && (
-            <div className="password-error">
-              {passwordError}
-            </div>
-          )}
-
-          {error && (
-            <div className="error-message" style={{ color: 'red' }}>
-              {error}
-            </div>
-          )}
-
-          <button type="submit" className="all-btns">Submit</button>
+          <button type="submit" className="all-btns" disabled={loading}>
+            {loading ? 'Registering...' : 'Submit'}
+          </button>
         </form>
       </div>
     </div>

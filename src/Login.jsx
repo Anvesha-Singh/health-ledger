@@ -9,107 +9,83 @@ const Login = () => {
   const [account, setAccount] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [web3, setWeb3] = useState(null);
   const [contract, setContract] = useState(null);
   const navigate = useNavigate();
 
-  // Initialize Web3 and contract on component mount
+  // Initialize Web3 and contract
   useEffect(() => {
     const initWeb3 = async () => {
       try {
-        if (window.ethereum) {
-          console.log("MetaMask detected");
-          const web3Instance = new Web3(window.ethereum);
-          setWeb3(web3Instance);
-          
-          await new Promise(resolve => setTimeout(resolve, 1000));
-
-          // Get and log current network ID
-          const networkId = await web3Instance.eth.net.getId();
-          console.log("Network ID:", networkId);
-          
-          // Check if contract exists on this network
-          if (AuthContract.networks[networkId]) {
-            const deployedAddress = AuthContract.networks[networkId].address;
-            console.log("Contract address from JSON:", deployedAddress);
-            
-            // Create contract instance
-            const contractInstance = new web3Instance.eth.Contract(
-              AuthContract.abi,
-              deployedAddress
-            );
-            setContract(contractInstance);
-            console.log("Contract initialized successfully");
-          } else {
-            console.error("Contract not deployed on network:", networkId);
-            setError(`Contract not deployed on network: ${networkId}. Check if you're connected to the right network.`);
-          }
-        } else {
-          console.error("MetaMask not installed");
-          setError("MetaMask not installed. Please install MetaMask to continue.");
+        if (!window.ethereum) {
+          setError('MetaMask not installed');
+          return;
         }
+
+        const web3 = new Web3(window.ethereum);
+        const networkId = await web3.eth.net.getId();
+        
+        // Check contract deployment
+        if (!AuthContract.networks[networkId]) {
+          setError(`Contract not deployed on network ${networkId}`);
+          return;
+        }
+
+        // Initialize contract
+        const contractInstance = new web3.eth.Contract(
+          AuthContract.abi,
+          AuthContract.networks[networkId].address
+        );
+        setContract(contractInstance);
+
+        // Check existing accounts
+        const accounts = await web3.eth.getAccounts();
+        if (accounts.length > 0) {
+          setAccount(accounts[0]);
+        }
+
       } catch (err) {
-        console.error("Web3 initialization error:", err);
-        setError("Web3 initialization error: " + err.message);
+        console.error("Initialization error:", err);
+        setError(err.message);
       }
     };
 
     initWeb3();
   }, []);
 
-  // Connect wallet and authenticate user
   const handleConnect = async (e) => {
     e.preventDefault();
+    if (!contract || loading) return;
+    
     setLoading(true);
     setError('');
-    
+
     try {
-      // Request account access
+      // Request accounts
       const accounts = await window.ethereum.request({ 
         method: 'eth_requestAccounts' 
       });
       const userAccount = accounts[0];
       setAccount(userAccount);
-      console.log("Connected account:", userAccount);
       
-      try {
-        // Get role with explicit gas parameters
-        const role = await contract.methods.roles(userAccount).call({
-          from: userAccount,
-          gasLimit: 3000000 // Explicit gas limit
-        });
-        
-        // Convert the role to a number for easier comparison
-        const roleNumber = parseInt(role);
-        console.log('Contract role:', role, 'Role Number:', roleNumber);
-        
-        // Navigate based on role
-        switch(roleNumber) {
-          case 3: // Admin
-            console.log("Navigating to admin dashboard");
-            navigate('/admin-dashboard');
-            break;
-          case 2: // Doctor
-            console.log("Navigating to doctor dashboard");
-            navigate('/doctor-dashboard');
-            break;
-          case 1: // Patient
-            console.log("Navigating to patient dashboard");
-            navigate('/patient-dashboard');
-            break;
-          default:
-            console.log("No role assigned, navigating to signup");
-            navigate('/signup');
-        }
+      await new Promise(resolve => setTimeout(resolve, 500));
+      // Get role using correct method
+      const role = await contract.methods.getRole(accounts[0]).call({
+        from: accounts[0],
+        gas: 300000
+      });
+      const roleNumber = Number(role);
 
-      } catch (roleErr) {
-        console.error("Role error:", roleErr);
-        setError("Unable to determine your role. Please try again.");
+      // Navigation logic
+      switch(roleNumber) {
+        case 3: navigate('/admin-dashboard'); break;
+        case 2: navigate('/doctor-dashboard'); break;
+        case 1: navigate('/patient-dashboard'); break;
+        default: navigate('/signup');
       }
 
     } catch (err) {
       console.error("Connection error:", err);
-      setError("Connection failed. Please ensure MetaMask is unlocked.");
+      setError(err.message || "Connection failed");
     } finally {
       setLoading(false);
     }
@@ -127,56 +103,35 @@ const Login = () => {
         
         <form onSubmit={handleConnect}>
           <div className="form-group">
-            {!account ? (
-              <input
-                type="text"
-                readOnly
-                value="Connect MetaMask to login"
-                style={{ 
-                  backgroundColor: "#1a1a1a", 
-                  cursor: "pointer",
-                  textAlign: "center",
-                  color: "#757575"
-                }}
-              />
-            ) : (
-              <input
-                type="text"
-                readOnly
-                value={`${account.slice(0, 6)}...${account.slice(-4)}`}
-                style={{ 
-                  backgroundColor: "#1a1a1a", 
-                  cursor: "default",
-                  textAlign: "center" 
-                }}
-              />
-            )}
-            
-            <div style={{ marginTop: "10px" }}></div>
-            
-            {!account && (
-              <input
-                type="text"
-                readOnly
-                value="No password needed"
-                style={{ 
-                  backgroundColor: "#1a1a1a", 
-                  cursor: "default",
-                  textAlign: "center",
-                  color: "#757575"
-                }}
-              />
-            )}
+            <input
+              type="text"
+              readOnly
+              value={account ? `${account.slice(0, 6)}...${account.slice(-4)}` : "Connect MetaMask"}
+              style={{ 
+                backgroundColor: "#1a1a1a", 
+                cursor: account ? "default" : "pointer",
+                textAlign: "center",
+                color: account ? "inherit" : "#757575"
+              }}
+            />
           </div>
           
           {error && <div className="error-message">{error}</div>}
           
           <div className="patient-actions">
-            <button type="submit" className="all-btns" disabled={loading}>
-              {loading ? "Connecting..." : (account ? "Sign in" : "Connect MetaMask")}
+            <button 
+              type="submit" 
+              className="all-btns" 
+              disabled={!contract || loading}
+            >
+              {loading ? "Connecting..." : "Sign In"}
             </button>
             
-            <button type="button" className="all-btns" onClick={() => navigate('/signup')}>
+            <button 
+              type="button" 
+              className="all-btns" 
+              onClick={() => navigate('/signup')}
+            >
               Sign Up
             </button>
           </div>

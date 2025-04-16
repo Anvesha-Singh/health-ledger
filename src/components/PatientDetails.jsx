@@ -5,48 +5,59 @@ import '../styles.css';
 
 const PatientDetails = () => {
   const [patientData, setPatientData] = useState(null);
-  const contract = useContext(ContractContext);
-  const [account, setAccount] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const { contract } = useContext(ContractContext);
 
   useEffect(() => {
     const loadData = async () => {
-      if (contract) {
-        try {
-          const web3 = new Web3(window.ethereum);
-          const accounts = await web3.eth.getAccounts();
-          setAccount(accounts[0]);
-          
-          const data = await contract.methods.patients(accounts[0]).call();
-          setPatientData({
-            id: accounts[0].slice(0,8).toUpperCase(),
-            name: data.name,
-            age: data.age.toString(),
-            gender: data.gender
-          });
-        } catch (err) {
-          console.error('Error loading patient data:', err);
-        }
+      try {
+        const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        
+        const data = await contract.methods.patients(accounts[0]).call();
+        
+        setPatientData({
+          name: data.name,
+          age: data.age.toString(),
+          gender: data.gender
+        });
+        
+      } catch (err) {
+        setError('Failed to load patient data');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
       }
     };
-    
-    loadData();
+
+    if (contract) loadData();
   }, [contract]);
 
-  if (!patientData) return <div>Loading patient data...</div>;
+  if (loading) return <div className="loading">Loading patient data...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="details">
-      <div className="field mb-1">
-        <span className="field-label">ID:</span> {patientData.id}
+    <div className="details-card">
+      <div className="detail-item">
+        <span className="detail-label">Patient ID:</span>
+        <span className="detail-value mono">{patientData.id}</span>
       </div>
-      <div className="field mb-1">
-        <span className="field-label">Name:</span> {patientData.name}
+      <div className="detail-item">
+        <span className="detail-label">Name:</span>
+        <span className="detail-value">{patientData.name}</span>
       </div>
-      <div className="field mb-1">
-        <span className="field-label">Age:</span> {patientData.age}
+      <div className="detail-item">
+        <span className="detail-label">Age:</span>
+        <span className="detail-value">{patientData.age}</span>
       </div>
-      <div className="field">
-        <span className="field-label">Gender:</span> {patientData.gender}
+      <div className="detail-item">
+        <span className="detail-label">Gender:</span>
+        <span className="detail-value">{patientData.gender}</span>
+      </div>
+      <div className="detail-item">
+        <span className="detail-label">Username:</span>
+        <span className="detail-value">{patientData.username}</span>
       </div>
     </div>
   );
