@@ -55,10 +55,6 @@ const PatientDetails = () => {
         <span className="detail-label">Gender:</span>
         <span className="detail-value">{patientData.gender}</span>
       </div>
-      <div className="detail-item">
-        <span className="detail-label">Username:</span>
-        <span className="detail-value">{patientData.username}</span>
-      </div>
     </div>
   );
 };

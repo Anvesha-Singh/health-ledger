@@ -1,62 +1,67 @@
-import React, { useState, useEffect, useContext } from "react";
-import { ContractContext } from "../context/ContractContext";
+import React, { useEffect, useState, useContext } from 'react';
+import { ContractContext } from '../context/ContractContext';
 import Web3 from 'web3';
 import '../styles.css';
 
-const PatientList = () => {
-  const { contract } = useContext(ContractContext);
-  const [patients, setPatients] = useState([]);
+const PatientDetails = () => {
+  const [patientData, setPatientData] = useState(null);
+  const [patientAddress, setPatientAddress] = useState('');
   const [loading, setLoading] = useState(true);
-
-  const loadPatients = async () => {
-    try {
-      const web3 = new Web3(window.ethereum);
-      const accounts = await web3.eth.getAccounts();
-      
-      // Get patients added by this doctor
-      const patientAddresses = await contract.methods.doctorPatients(accounts[0]).call();
-      
-      // Get patient details
-      const patientData = await Promise.all(
-        patientAddresses.map(async address => {
-          const data = await contract.methods.patients(address).call();
-          return {
-            address,
-            name: data.name
-          };
-        })
-      );
-      
-      setPatients(patientData);
-    } catch (err) {
-      console.error("Error loading patients:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [error, setError] = useState('');
+;  const { contract } = useContext(ContractContext);
 
   useEffect(() => {
-    if (contract) loadPatients();
+    const loadData = async () => {
+      try {
+        const web3 = new Web3(window.ethereum);
+        const accounts = await web3.eth.getAccounts();
+        const currentAddress = accounts[0];
+        setPatientAddress(currentAddress);
+
+        const data = await contract.methods.patients(currentAddress).call();
+        
+        setPatientData({
+          name: data.name || 'Not provided',
+          age: data.age.toString() || 'N/A',
+          gender: data.gender || 'Not specified'
+        });
+        
+      } catch (err) {
+        setError('Failed to load patient data - make sure you\'re registered');
+        console.error('Error:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (contract) loadData();
   }, [contract]);
 
-  if (loading) return <div>Loading patients...</div>;
+  if (loading) return <div className="loading">Loading patient data...</div>;
+  if (error) return <div className="error">{error}</div>;
 
   return (
-    <div className="patient-list">
-      {patients.length === 0 ? (
-        <div className="empty-state">No patients found</div>
-      ) : (
-        patients.map((patient) => (
-          <div key={patient.address} className="patient-card">
-            <div className="patient-header">
-              <h5>{patient.name}</h5>
-              <span>{patient.address.slice(0, 12)}...</span>
-            </div>
-          </div>
-        ))
-      )}
+    <div className="details-card" style={{ backgroundColor: '#f8f9fa', color: '#333' }}>
+      <div className="detail-item">
+        <span className="detail-label">Wallet Address:</span>
+        <span className="detail-value mono">
+          {patientAddress.substring(0, 10)}...
+        </span>
+      </div>
+      <div className="detail-item">
+        <span className="detail-label">Name:</span>
+        <span className="detail-value">{patientData.name}</span>
+      </div>
+      <div className="detail-item">
+        <span className="detail-label">Age:</span>
+        <span className="detail-value">{patientData.age}</span>
+      </div>
+      <div className="detail-item">
+        <span className="detail-label">Gender:</span>
+        <span className="detail-value">{patientData.gender}</span>
+      </div>
     </div>
   );
 };
 
-export default PatientList;
+export default PatientDetails;

@@ -18,46 +18,57 @@ const AdminDashboard = () => {
       try {
         setLoading(true);
         const accounts = await web3.eth.getAccounts();
+        const currentAccount = accounts[0];
     
-        // Load hospital details
-        const hospitalData = await contract.methods.hospitals(accounts[0]).call();
-        setHospitalName(hospitalData.name || '');
+        // Load hospital details with fallback
+        const hospitalData = await contract.methods.hospitals(currentAccount).call();
+        setHospitalName(hospitalData.name || 'Unregistered Hospital');
     
-        // Fetch doctor addresses registered by this admin
-        const doctorAddresses = await contract.methods.getDoctorsByAdmin(accounts[0]).call({
-          from: accounts[0],
-          gas: 300000
+        // Fetch doctor addresses with gas limit
+        const doctorAddresses = await contract.methods.getDoctorsByAdmin(currentAccount).call({
+          from: currentAccount,
+          gas: 500000
         });
     
-        if (doctorAddresses && doctorAddresses.length > 0) {
-          // Fetch full details for each doctor
-          const doctorsData = await Promise.all(
-            doctorAddresses.map(async (address) => {
-              const [name, specialization, hospital] = await contract.methods.getDoctorDetails(address).call({
-                from: accounts[0],
-                gas: 100000
+        // Process doctors with error handling
+        if (doctorAddresses?.length > 0) {
+          const doctorsPromises = doctorAddresses.map(async (address) => {
+            try {
+              const result = await contract.methods.getDoctorDetails(address).call({
+                from: currentAccount,
+                gas: 300000
               });
+              
               return {
                 address,
-                name,
-                specialization,
-                hospital
+                name: result[0] || 'Unnamed Doctor',
+                specialization: result[1] || 'General Practitioner',
+                hospital: result[2] || hospitalData.name
               };
-            })
-          );
-          setDoctorsList(doctorsData);
+            } catch (error) {
+              console.error(`Error loading doctor ${address}:`, error);
+              return null;
+            }
+          });
+    
+          const doctorsData = await Promise.all(doctorsPromises);
+          const validDoctors = doctorsData.filter(doc => doc !== null);
+          setDoctorsList(validDoctors);
         } else {
           setDoctorsList([]);
         }
+        
         setMessage('');
       } catch (err) {
         console.error('Loading error:', err);
-        setMessage('Failed to load data: ' + (err.message || 'Unknown error'));
+        setMessage(`Failed to load data: ${err.message.includes('invalid opcode') 
+                   ? 'Contract validation error - check compiler version' 
+                   : err.message}`);
         setDoctorsList([]);
       } finally {
         setLoading(false);
       }
-    };        
+    };          
 
     if (contract) loadHospitalAndDoctors();
   }, [contract]);
@@ -177,8 +188,8 @@ const AdminDashboard = () => {
                   {doctorsList.map((doc) => (
                     <div className="doctor-card" key={doc.address}>
                     <div className="doctor-header">
-                      <h4>{doc.name}</h4>
-                      <span>{doc.specialization}</span>
+                      <h4 className="detail-value">{doc.name}</h4>
+                      <span className="detail-value">{doc.specialization}</span>
                     </div>
                     <div className="doctor-details">
                       <p>Hospital: {doc.hospital}</p>
