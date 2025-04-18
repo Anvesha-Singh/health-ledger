@@ -1,70 +1,47 @@
-# Getting Started with Create React App
+# Introduction to Health Ledger 
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+The Health Ledger project is a blockchain-based decentralized healthcare management system designed to securely store and manage medical records, prescriptions, and appointments. It leverages Ethereum smart contracts to ensure data integrity, transparency, and patient control over their health information.
 
-## Available Scripts
+### Key Features:
+**Medical Record Management:** Patients can securely store and manage their medical records, including prescriptions and test results.
 
-In the project directory, you can run:
+**Appointment Scheduling:** A system for booking appointments with healthcare providers, ensuring efficient scheduling and management.
 
-### `npm start`
+**Access Control:** Patients have full control over who can access their medical data, promoting privacy and consent.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+**Blockchain Security:** Utilizes blockchain technology to ensure data is tamper-proof and secure.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Prerequisites
 
-### `npm test`
+- Node.js & npm
+- Python 3
+- Ganache
+- MetaMask
+- Remix IDE
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Running the Website
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+git clone https://github.com/Anvesha-Singh/health-ledger.git
+cd health-ledger
+npm run dev
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Deploying Smart Contract
 
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+1. Start Ganache with specific network ID:
+   ```bash
+   ganache --networkId 1337
+   ```
+2. Copy the **first private key** and import it into MetaMask.
+3. Make sure MetaMask is connected to **Localhost 8545**.
+4. Open [Remix IDE](https://remix.ethereum.org/), paste and compile the contract in Auth.sol.
+5. In the "Deploy & Run" section:
+   - Select **Injected Web3** as environment.
+   - It should automatically load the imported account.
+6. Deploy the contract.
+7. Copy the **ABI** and **Contract Address** after deployment and paste them into Auth.json.
