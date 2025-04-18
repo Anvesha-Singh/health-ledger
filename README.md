@@ -39,9 +39,23 @@ npm run dev
    ```
 2. Copy the **first private key** and import it into MetaMask.
 3. Make sure MetaMask is connected to **Localhost 8545**.
-4. Open [Remix IDE](https://remix.ethereum.org/), paste and compile the contract in Auth.sol.
+4. Open [Remix IDE](https://remix.ethereum.org/), paste and compile the contract in Auth.sol. (This project runs on ver 0.8.19)
 5. In the "Deploy & Run" section:
    - Select **Injected Web3** as environment.
    - It should automatically load the imported account.
 6. Deploy the contract.
 7. Copy the **ABI** and **Contract Address** after deployment and paste them into Auth.json.
+
+---
+
+## Deploying IPFS (Pinata)
+
+1. Make an account on Pinata.
+2. Create a new API Key.
+3. Copy the keys into a .env file.
+   ```bash
+   REACT_APP_PINATA_KEY
+   REACT_APP_PINATA_SECRET
+   VITE_PINATA_JWT
+   VITE_PINATA_GATEWAY
+   ```
