@@ -1,6 +1,6 @@
 # Introduction to Health Ledger 
 
-The Health Ledger project is a blockchain-based decentralized healthcare management system designed to securely store and manage medical records, prescriptions, and appointments. It leverages Ethereum smart contracts to ensure data integrity, transparency, and patient control over their health information.
+Health Ledger is a blockchain-based decentralized healthcare management system designed to securely store and manage medical records, prescriptions, and appointments. It leverages Ethereum smart contracts to ensure data integrity, transparency, and patient control over their health information.
 
 ### Key Features:
 **1. Medical Record Management:** Patients can securely store and manage their medical records, including prescriptions and test results.
