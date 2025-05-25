@@ -204,4 +204,17 @@ contract HealthAuth {
         MedicalFile storage file = patientFiles[msg.sender][index];
         return (file.ipfsHash, file.timestamp, file.fileName);
     }
+
+    function deleteMedicalFile(uint256 index) external {
+        require(roles[msg.sender] == Role.Patient, "Only patients can delete files");
+        require(index < patientFiles[msg.sender].length, "Invalid file index");
+
+        uint256 lastIndex = patientFiles[msg.sender].length - 1;
+        if (index != lastIndex) {
+            // Move the last file to the deleted spot to maintain array continuity
+            patientFiles[msg.sender][index] = patientFiles[msg.sender][lastIndex];
+        }
+        patientFiles[msg.sender].pop();
+    }
+
 }
