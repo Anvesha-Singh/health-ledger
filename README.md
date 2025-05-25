@@ -5,11 +5,17 @@ Health Ledger is a blockchain-based decentralized healthcare management system d
 ### Key Features:
 **1. Medical Record Management:** Patients can securely store and manage their medical records, including prescriptions and test results.
 
-**2. Appointment Scheduling:** A system for booking appointments with healthcare providers, ensuring efficient scheduling and management.
+**2. Appointment Scheduling:** A system for booking appointments with healthcare providers, allowing only booked doctors to access a patient's records.
 
 **3. Access Control:** Patients have full control over who can access their medical data, promoting privacy and consent.
 
-**4. Blockchain Security:** Utilizes blockchain technology to ensure data is tamper-proof and secure.
+**4. Blockchain Security:** Only authorized Admins able to register Doctors with valid accounts.
+
+**5. AI Summarizer:** A Generative AI model used for providing quick overview of the patient's history highlighting key issues.
+
+## Demo Video
+
+https://github.com/user-attachments/assets/a7be000c-4385-446c-9d07-c82206ee9ddc
 
 ## Prerequisites
 
@@ -21,7 +27,7 @@ Health Ledger is a blockchain-based decentralized healthcare management system d
 
 ---
 
-## Running the Website
+## Deploying the Website
 
 ```bash
 git clone https://github.com/Anvesha-Singh/health-ledger.git
@@ -33,7 +39,7 @@ npm run dev
 
 ## Deploying Smart Contract
 
-1. Start Ganache with specific network ID:
+1. Start Ganache with specific network ID in a separate terminal:
    ```bash
    ganache --networkId 1337
    ```
@@ -59,3 +65,19 @@ npm run dev
    VITE_PINATA_JWT
    VITE_PINATA_GATEWAY
    ```
+
+---
+
+## Deploying AI Summarizer 
+
+1. Make an account on Gemini.
+2. Create a new API Key.
+3. Copy the key into a .env file.
+   ```bash
+   GEMINI_API_KEY
+   ```
+4. Start the summarizer in a third terminal:
+   ```bash
+   python3 app.py
+   ```
+   
