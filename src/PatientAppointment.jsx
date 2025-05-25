@@ -1,4 +1,3 @@
-// Updated PatientAppointment.jsx
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ContractContext } from "./context/ContractContext";
@@ -24,8 +23,6 @@ const PatientAppointment = () => {
     const loadData = async () => {
       const accounts = await web3.eth.getAccounts();
       setPatientAddress(accounts[0]);
-      
-      // Fetch all doctors
       const doctorAddresses = await contract.methods.getAllDoctors().call();
       const doctorDetails = await Promise.all(
         doctorAddresses.map(async addr => {
@@ -37,30 +34,24 @@ const PatientAppointment = () => {
           };
         })
       );
-      
-      // Get unique specializations
       const specs = [...new Set(doctorDetails.map(d => d.specialization))];
       setSpecializations(specs);
       setDoctors(doctorDetails);
     };
-    
     if (contract) loadData();
   }, [contract]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const selectedDoctorAddress = doctor; // Now contains the address directly
-    
+    const selectedDoctorAddress = doctor;
     try {
       const accounts = await web3.eth.getAccounts();
       const timestamp = Math.floor(new Date(date).getTime() / 1000);
-      
       await contract.methods.bookAppointment(
-        selectedDoctorAddress, // Use address directly
+        selectedDoctorAddress,
         timestamp,
         slot
       ).send({ from: accounts[0], gas: 500000 });
-      
       navigate(-1);
     } catch (err) {
       console.error("Booking failed:", err);
@@ -71,100 +62,100 @@ const PatientAppointment = () => {
   return (
     <div className="app-container">
       <Header />
-      <div className="dashboard-content">
-        <h1 className="dashboard-title">
+      <div className="dashboard-content" style={{
+        maxWidth: "650px",
+        margin: "2rem auto",
+        background: "#fff",
+        borderRadius: "14px",
+        boxShadow: "0 2px 12px #0002",
+        padding: "2.5rem 2.5rem"
+      }}>
+        <h1 className="dashboard-title" style={{textAlign: "center", marginBottom: "2rem"}}>
           {mode === "book" ? "Book Appointment" : "Reschedule Appointment"}
         </h1>
-
-        <div className="dashboard-columns">
-          <div className="column left-column">
-            <div className="appointment-form">
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label>Patient Address</label>
-                  <input
-                    type="text"
-                    value={patientAddress}
-                    readOnly
-                    className="form-input"
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Department</label>
-                  <select
-                    value={department}
-                    onChange={e => {
-                      setDepartment(e.target.value);
-                      setDoctor("");
-                      setSlot("");
-                    }}
-                    className="form-select"
-                    required
-                  >
-                    <option value="">Select Department</option>
-                    {specializations.map((spec, i) => (
-                      <option key={i} value={spec}>{spec}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Doctor</label>
-                  <select
-                    value={doctor}
-                    onChange={e => {
-                      setDoctor(e.target.value);
-                      setSlot("");
-                    }}
-                    className="form-select"
-                    required
-                    disabled={!department}
-                  >
-                    <option value="">Select Doctor</option>
-                    {doctors
-                    .filter(d => d.specialization === department)
-                    .map((d, i) => (
-                      <option key={i} value={d.address}>{d.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Date</label>
-                  <input
-                    type="date"
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
-                    className="form-input"
-                    required
-                    min={new Date().toISOString().split('T')[0]}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Time Slot</label>
-                  <select
-                    value={slot}
-                    onChange={e => setSlot(e.target.value)}
-                    className="form-select"
-                    required
-                    disabled={!doctor}
-                  >
-                    <option value="">Select Time Slot</option>
-                    {timeSlots.map((t, i) => (
-                      <option key={i} value={t}>{t}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <button type="submit" className="all-btns">
-                  {mode === "reschedule" ? "Reschedule" : "Book"} Appointment
-                </button>
-              </form>
-            </div>
+        <form onSubmit={handleSubmit}>
+          <div className="form-group" style={{marginBottom: "1.4rem"}}>
+            <label>Patient Address</label>
+            <input
+              type="text"
+              value={patientAddress}
+              readOnly
+              className="form-input"
+              style={{width: "100%"}}
+            />
           </div>
-        </div>
+          <div className="form-group" style={{marginBottom: "1.4rem"}}>
+            <label>Department</label>
+            <select
+              value={department}
+              onChange={e => {
+                setDepartment(e.target.value);
+                setDoctor("");
+                setSlot("");
+              }}
+              className="form-select"
+              required
+              style={{width: "100%"}}
+            >
+              <option value="">Select Department</option>
+              {specializations.map((spec, i) => (
+                <option key={i} value={spec}>{spec}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group" style={{marginBottom: "1.4rem"}}>
+            <label>Doctor</label>
+            <select
+              value={doctor}
+              onChange={e => {
+                setDoctor(e.target.value);
+                setSlot("");
+              }}
+              className="form-select"
+              required
+              disabled={!department}
+              style={{width: "100%"}}
+            >
+              <option value="">Select Doctor</option>
+              {doctors
+                .filter(d => d.specialization === department)
+                .map((d, i) => (
+                  <option key={i} value={d.address}>{d.name}</option>
+                ))}
+            </select>
+          </div>
+          <div className="form-group" style={{marginBottom: "1.4rem"}}>
+            <label>Date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={e => setDate(e.target.value)}
+              className="form-input"
+              required
+              min={new Date().toISOString().split('T')[0]}
+              style={{width: "100%"}}
+            />
+          </div>
+          <div className="form-group" style={{marginBottom: "2rem"}}>
+            <label>Time Slot</label>
+            <select
+              value={slot}
+              onChange={e => setSlot(e.target.value)}
+              className="form-select"
+              required
+              disabled={!doctor}
+              style={{width: "100%"}}
+            >
+              <option value="">Select Time Slot</option>
+              {timeSlots.map((t, i) => (
+                <option key={i} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <button type="submit" className="all-btns" style={{width: "100%", marginTop: "1.5rem"}}>
+            {mode === "reschedule" ? "Reschedule" : "Book"} Appointment
+          </button>
+        </form>
       </div>
     </div>
   );
